@@ -126,7 +126,12 @@ class SubscribersController < ApplicationController
       headers["Content-Disposition"] = "attachment; filename=\"#{filename}\""
     end
 
-    render :text => Proc.new { |response, output|
+    render :text => proc { |response, output|
+      #monkey patch /duck typing. 2.3 rails ActionController::Response doesn't have <<, only write
+      def output.<<(*args)  
+        write(*args)  
+      end
+      
       csv = FasterCSV.new(output, :row_sep => "\r\n")
       yield csv
     }
